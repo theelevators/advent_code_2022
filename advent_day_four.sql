@@ -60,3 +60,40 @@ FROM OverlappingOne
 WHERE Results IS NOT NULL
 
 
+;WITH OverlappingTwo AS (
+SELECT 
+	LeftAssignments
+	,RightAssignments
+	,CASE
+		WHEN (LEFT(RightAssignments,CHARINDEX('-', RightAssignments)-1)
+				= LEFT(LeftAssignments,CHARINDEX('-', LeftAssignments)-1))
+				OR
+				(RIGHT(RightAssignments,LEN(RightAssignments)-CHARINDEX('-', RightAssignments))
+				= RIGHT(LeftAssignments,LEN(LeftAssignments)-CHARINDEX('-', LeftAssignments)))
+		THEN 'Overlaps'
+		WHEN (CAST(LEFT(RightAssignments,CHARINDEX('-', RightAssignments)-1) AS INT)
+				BETWEEN CAST(LEFT(LeftAssignments,CHARINDEX('-', LeftAssignments)-1) AS INT)
+				AND CAST(RIGHT(LeftAssignments,LEN(LeftAssignments)-CHARINDEX('-', LeftAssignments))AS INT))
+				OR 
+				(CAST(RIGHT(RightAssignments,LEN(RightAssignments)-CHARINDEX('-', RightAssignments)) AS INT)
+				BETWEEN CAST(LEFT(LeftAssignments,CHARINDEX('-', LeftAssignments)-1) AS INT)
+				AND CAST(RIGHT(LeftAssignments,LEN(LeftAssignments)-CHARINDEX('-', LeftAssignments)) AS INT)
+				)
+		THEN 'Overlaps'
+		WHEN (CAST(LEFT(LeftAssignments,CHARINDEX('-', LeftAssignments)-1) AS INT)
+				BETWEEN CAST(LEFT(RightAssignments,CHARINDEX('-', RightAssignments)-1) AS INT)
+				AND CAST(RIGHT(RightAssignments,LEN(RightAssignments)-CHARINDEX('-', RightAssignments)) AS INT)
+				)
+				OR 
+				(CAST(RIGHT(LeftAssignments,LEN(LeftAssignments)-CHARINDEX('-', LeftAssignments)) AS INT)
+				BETWEEN CAST(LEFT(RightAssignments,CHARINDEX('-', RightAssignments)-1) AS INT)
+				AND CAST(RIGHT(RightAssignments,LEN(RightAssignments)-CHARINDEX('-', RightAssignments)) AS INT))
+		THEN 'Overlaps'
+		END Results
+
+FROM @ParsedInput )
+SELECT
+	'' SolutionTwo
+	,COUNT(*) TotalCount
+FROM OverlappingTwo
+WHERE Results IS NOT NULL
